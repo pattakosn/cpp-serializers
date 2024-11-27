@@ -1,4 +1,6 @@
-cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
+#set(CMAKE_TOOLCHAIN_FILE %VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake
+set(CMAKE_TOOLCHAIN_FILE "D:/github.com/vcpkg1/scripts/buildsystems/vcpkg.cmake")
+cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 project(cpp_serializers LANGUAGES CXX VERSION 0.1.0)
 
 if (NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -11,44 +13,36 @@ include(CheckIncludeFiles)
 include(CheckCXXCompilerFlag)
 include(ExternalProject)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_BUILD_TYPE Release FORCE)
 
-CHECK_CXX_COMPILER_FLAG("-std=c++14" CXX14)
-if (NOT CXX14)
-    message(FATAL_ERROR "C++ compiler doesn't support C++14")
-endif()
 
 CHECK_INCLUDE_FILES("inttypes.h" HAVE_INTTYPES_H)
-CHECK_INCLUDE_FILES("netinet/in.h" HAVE_NETINET_IN_H)
-
 if (HAVE_INTTYPES_H)
     add_definitions("-DHAVE_INTTYPES_H")
 endif()
 
+CHECK_INCLUDE_FILES("netinet/in.h" HAVE_NETINET_IN_H)
 if (HAVE_NETINET_IN_H)
     add_definitions("-DHAVE_NETINET_IN_H")
 endif()
 
 include_directories(${cpp_serializers_SOURCE_DIR})
 
-find_package(ZLIB)
-if (NOT ZLIB_FOUND)
-    message(FATAL_ERROR "Couldn't find zlib library")
-endif()
+find_package(ZLIB REQUIRED)
 include_directories(${ZLIB_INCLUDE_DIRS})
 
-find_program(AUTORECONF NAMES autoreconf)
-if (NOT AUTORECONF)
-    message(FATAL_ERROR "Autoreconf not found")
-else()
-    message(STATUS "Found autoreconf: ${AUTORECONF}")
-endif()
+find_program(AUTORECONF NAMES autoreconf REQUIRED)
+message(STATUS "Found autoreconf: ${AUTORECONF}")
 
-find_program(LIBTOOL NAMES libtool libtoolize)
-if (NOT LIBTOOL)
-    message(FATAL_ERROR "Libtool not found")
-else()
-    message(STATUS "Found libtool: ${LIBTOOL}")
+find_program(LIBTOOL NAMES libtool libtoolize REQUIRED)
+message(STATUS "Found libtool: ${LIBTOOL}")
+
+if(POLICY CMP0135)
+  cmake_policy(SET CMP0135 NEW)
 endif()
 
 set(CXXOPTS_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/external/cxxopts)
